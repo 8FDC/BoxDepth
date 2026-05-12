@@ -47,10 +47,10 @@ A monocular metric depth estimation approach for box interior images leveraging 
 深度图到点云的反投影公式为：
 
 $$
-\begin{bmatrix} x_c \\ y_c \\ z_c \end{bmatrix}
+\begin{bmatrix} x_c \\\\ y_c \\\\ z_c \end{bmatrix}
 =
 z_c K^{-1}
-\begin{bmatrix} u \\ v \\ 1 \end{bmatrix}
+\begin{bmatrix} u \\\\ v \\\\ 1 \end{bmatrix}
 $$
 
 其中，$(u,v)$ 为像素坐标，$z_c$ 为该像素的深度值，$K$ 是相机内参，定义为：
@@ -58,8 +58,8 @@ $$
 $$
 K =
 \begin{bmatrix}
-f_x & \alpha & u_0 \\
-0 & f_y & v_0 \\
+f_x & \alpha & u_0 \\\\
+0 & f_y & v_0 \\\\
 0 & 0 & 1
 \end{bmatrix}
 $$
@@ -81,21 +81,21 @@ $$
 根据相机成像模型，图像坐标系下的点与世界坐标系下的点存在如下对应关系：
 
 $$
-z_c \begin{bmatrix} u \\ v \\ 1 \end{bmatrix} = \begin{bmatrix} K & 0 \end{bmatrix} \begin{bmatrix} R & T \\ 0 & 1 \end{bmatrix} \begin{bmatrix} x_w \\ y_w \\ z_w \\ 1 \end{bmatrix}
+z_c \begin{bmatrix} u \\\\ v \\\\ 1 \end{bmatrix} = \begin{bmatrix} K & 0 \end{bmatrix} \begin{bmatrix} R & T \\\\ 0 & 1 \end{bmatrix} \begin{bmatrix} x_w \\\\ y_w \\\\ z_w \\\\ 1 \end{bmatrix}
 $$
 
 推导得：
 
 $$
-\begin{bmatrix} x_w \\ y_w \\ z_w \end{bmatrix} = R^{-1} \left( K^{-1} \begin{bmatrix} u \\ v \\ 1 \end{bmatrix} z_c - T \right)
+\begin{bmatrix} x_w \\\\ y_w \\\\ z_w \end{bmatrix} = R^{-1} \left( K^{-1} \begin{bmatrix} u \\\\ v \\\\ 1 \end{bmatrix} z_c - T \right)
 $$
 
 为简化计算，本方法假定世界坐标系与相机坐标系重合（即 $R$ 为单位阵，$T$ 为零向量）。记 $R^{-1}K^{-1} = A(a_{ij})$，$-R^{-1}T = B(b_i)$，过像素点的射线直线方程为：
 
 $$
 \begin{cases}
-x_w = (a_{11}u + a_{12}v + a_{13})z_c + b_1 \\
-y_w = (a_{21}u + a_{22}v + a_{23})z_c + b_2 \\
+x_w = (a_{11}u + a_{12}v + a_{13})z_c + b_1 \\\\
+y_w = (a_{21}u + a_{22}v + a_{23})z_c + b_2 \\\\
 z_w = (a_{31}u + a_{32}v + a_{33})z_c + b_3
 \end{cases}
 $$
@@ -104,9 +104,9 @@ $$
 
 $$
 \begin{aligned}
-P_{\text{left}}: & \quad y_w = \frac{\text{length}}{2} \\
-P_{\text{right}}: & \quad y_w = -\frac{\text{length}}{2} \\
-P_{\text{front}}: & \quad x_w = \frac{\text{width}}{2} \\
+P_{\text{left}}: & \quad y_w = \frac{\text{length}}{2} \\\\
+P_{\text{right}}: & \quad y_w = -\frac{\text{length}}{2} \\\\
+P_{\text{front}}: & \quad x_w = \frac{\text{width}}{2} \\\\
 P_{\text{back}}: & \quad x_w = -\frac{\text{width}}{2}
 \end{aligned}
 $$
@@ -115,14 +115,12 @@ $$
 
 $$
 \begin{aligned}
-\text{depth}_{\text{left}} &= \frac{\text{length}/2 - b_2}{a_{21}u + a_{22}v + a_{23}} \\
-\text{depth}_{\text{right}} &= \frac{-\text{length}/2 - b_2}{a_{21}u + a_{22}v + a_{23}} \\
-\text{depth}_{\text{front}} &= \frac{\text{width}/2 - b_1}{a_{11}u + a_{12}v + a_{13}} \\
+\text{depth}_{\text{left}} &= \frac{\text{length}/2 - b_2}{a_{21}u + a_{22}v + a_{23}} \\\\
+\text{depth}_{\text{right}} &= \frac{-\text{length}/2 - b_2}{a_{21}u + a_{22}v + a_{23}} \\\\
+\text{depth}_{\text{front}} &= \frac{\text{width}/2 - b_1}{a_{11}u + a_{12}v + a_{13}} \\\\
 \text{depth}_{\text{back}} &= \frac{-\text{width}/2 - b_1}{a_{11}u + a_{12}v + a_{13}}
 \end{aligned}
 $$
-
-> *注：上述公式根据 $x_w, y_w$ 的对应关系进行了修正。*
 
 由于箱体底面与相机的距离（height）已知，则底面区域深度为：
 
