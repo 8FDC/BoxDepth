@@ -47,18 +47,10 @@ A monocular metric depth estimation approach for box interior images leveraging 
 深度图到点云的反投影公式为：
 
 $$
-\begin{bmatrix}
-x_c \\
-y_c \\
-z_c
-\end{bmatrix}
+\begin{bmatrix}x_c \\ y_c \\ z_c\end{bmatrix}
 =
 z_c\,K^{-1}
-\begin{bmatrix}
-u \\
-v \\
-1
-\end{bmatrix}
+\begin{bmatrix}u \\ v \\ 1\end{bmatrix}
 $$
 
 其中，$(u,v)$ 为像素坐标，$z_c$ 为该像素的深度值，$K$是相机内参,定义为
