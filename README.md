@@ -40,35 +40,25 @@ A monocular metric depth estimation approach for box interior images leveraging 
   <img src="./assets/depth_prediction_scatter.png" alt="box image" height="400" />
 </p>
 
-你可以使用 Depth Pro 或 DepthAnything v2（metric depth 版本），它们本应预测出 metric depth，但其结果与实际深度值仍存在不可避免的尺度偏移，该偏移的大小不影响本方法结果。
+你可以使用 Depth Pro 或 DepthAnything v2（metric depth 版本），它们本应预测出 metric depth，但其结果与实际深度值仍存在不可避免的尺度偏移。
 
 ### Step 2：根据预测深度图生成点云
 
 深度图到点云的反投影公式为：
 
 $$
-\begin{bmatrix} x_c \\\\ y_c \\\\ z_c \end{bmatrix}
-=
-z_c K^{-1}
-\begin{bmatrix} u \\\\ v \\\\ 1 \end{bmatrix}
+\begin{bmatrix} x_c \\\\ y_c \\\\ z_c \end{bmatrix} = z_c K^{-1} \begin{bmatrix} u \\\\ v \\\\ 1 \end{bmatrix}
 $$
 
 其中，$(u,v)$ 为像素坐标，$z_c$ 为该像素的深度值，$K$ 是相机内参，定义为：
 
 $$
-K =
-\begin{bmatrix}
-f_x & \alpha & u_0 \\\\
-0 & f_y & v_0 \\\\
-0 & 0 & 1
-\end{bmatrix}
+K = \begin{bmatrix} f_x & \alpha & u_0 \\\\ 0 & f_y & v_0 \\\\ 0 & 0 & 1 \end{bmatrix}
 $$
 
 可以使用 Open3D 库的 `o3d.geometry.PointCloud.create_from_depth_image(depth, intrinsics)` 实现转换。
 
 ### Step 3：根据点云计算各个像素点的法向量，并依据法向量分割平面
-
-该步骤可通过 Open3D 的 `pcd.estimate_normals` 函数实现。
 
 理想情况下，箱体（俯视视角）前、后、左、右、底面五个侧面的法向量应分别为 $(0,-1,0)$、$(0,1,0)$、$(-1,0,0)$、$(1,0,0)$、$(0,0,1)$。通过计算每个像素点的法向量与这五个基准法向量的**余弦相似度**来确定该像素所属平面：
 
@@ -90,36 +80,22 @@ $$
 \begin{bmatrix} x_w \\\\ y_w \\\\ z_w \end{bmatrix} = R^{-1} \left( K^{-1} \begin{bmatrix} u \\\\ v \\\\ 1 \end{bmatrix} z_c - T \right)
 $$
 
-为简化计算，本方法假定世界坐标系与相机坐标系重合（即 $R$ 为单位阵，$T$ 为零向量）。记 $R^{-1}K^{-1} = A(a_{ij})$，$-R^{-1}T = B(b_i)$，过像素点的射线直线方程为：
+为简化计算，本方法假定世界坐标系与相机坐标系重合。记 $R^{-1}K^{-1} = A(a_{ij})$，$-R^{-1}T = B(b_i)$，过像素点的射线直线方程为：
 
 $$
-\begin{cases}
-x_w = (a_{11}u + a_{12}v + a_{13})z_c + b_1 \\\\
-y_w = (a_{21}u + a_{22}v + a_{23})z_c + b_2 \\\\
-z_w = (a_{31}u + a_{32}v + a_{33})z_c + b_3
-\end{cases}
+\begin{cases} x_w = (a_{11}u + a_{12}v + a_{13})z_c + b_1 \\\\ y_w = (a_{21}u + a_{22}v + a_{23})z_c + b_2 \\\\ z_w = (a_{31}u + a_{32}v + a_{33})z_c + b_3 \end{cases}
 $$
 
 箱体内部长度（length）、宽度（width）已知，四个内壁平面方程为：
 
 $$
-\begin{aligned}
-P_{\text{left}}: & \quad y_w = \frac{\text{length}}{2} \\\\
-P_{\text{right}}: & \quad y_w = -\frac{\text{length}}{2} \\\\
-P_{\text{front}}: & \quad x_w = \frac{\text{width}}{2} \\\\
-P_{\text{back}}: & \quad x_w = -\frac{\text{width}}{2}
-\end{aligned}
+\begin{aligned} P_{\text{left}}: & \quad y_w = \frac{\text{length}}{2} \\\\ P_{\text{right}}: & \quad y_w = -\frac{\text{length}}{2} \\\\ P_{\text{front}}: & \quad x_w = \frac{\text{width}}{2} \\\\ P_{\text{back}}: & \quad x_w = -\frac{\text{width}}{2} \end{aligned}
 $$
 
 将平面方程与射线方程联立，解出的 $z_c$ 即为该像素点的**真实深度**：
 
 $$
-\begin{aligned}
-\text{depth}_{\text{left}} &= \frac{\text{length}/2 - b_2}{a_{21}u + a_{22}v + a_{23}} \\\\
-\text{depth}_{\text{right}} &= \frac{-\text{length}/2 - b_2}{a_{21}u + a_{22}v + a_{23}} \\\\
-\text{depth}_{\text{front}} &= \frac{\text{width}/2 - b_1}{a_{11}u + a_{12}v + a_{13}} \\\\
-\text{depth}_{\text{back}} &= \frac{-\text{width}/2 - b_1}{a_{11}u + a_{12}v + a_{13}}
-\end{aligned}
+\begin{aligned} \text{depth}_{\text{left}} &= \frac{\text{length}/2 - b_2}{a_{21}u + a_{22}v + a_{23}} \\\\ \text{depth}_{\text{right}} &= \frac{-\text{length}/2 - b_2}{a_{21}u + a_{22}v + a_{23}} \\\\ \text{depth}_{\text{front}} &= \frac{\text{width}/2 - b_1}{a_{11}u + a_{12}v + a_{13}} \\\\ \text{depth}_{\text{back}} &= \frac{-\text{width}/2 - b_1}{a_{11}u + a_{12}v + a_{13}} \end{aligned}
 $$
 
 由于箱体底面与相机的距离（height）已知，则底面区域深度为：
