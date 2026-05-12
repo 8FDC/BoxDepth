@@ -54,6 +54,7 @@ pcd = o3d.geometry.PointCloud.create_from_depth_image(depth, intrinsics)
 pcd.estimate_normals(search_param=o3d.geometry.KDTreeSearchParamHybrid(radius=5, max_nn=20))
 normals = np.asarray(pcd.normals)
 normals = normals.reshape(h, w, 3)
+plt.imsave("sample/normals.png", (normals + 1) / 2)
 
 # Classify normals into 5 categories based on their orientation
 left = np.zeros((h, w)).astype(bool)
@@ -118,5 +119,9 @@ depth[bottom==True] = camera_height
 depth[depth==0] = np.nan
 depth[depth>camera_height] = np.nan
 
-plt.imsave("sample/depth_computed.png", depth, cmap="jet_r")
+plt.figure()
+plt.imshow(depth, cmap="jet_r")
+plt.colorbar()
+plt.savefig("sample/depth_computed.png")
+
 np.save("sample/depth_computed.npy", depth)

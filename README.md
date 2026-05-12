@@ -6,6 +6,10 @@ A monocular metric depth estimation approach for box interior images leveraging 
 
 现有的单目图像深度估计模型，其在不经过微调或特定场景数据集训练的情况下，通常存在不同程度的尺度偏差问题，导致其估计结果和实际深度差异较大，难以直接应用到视觉测量系统中。本方法利用深度估计模型输出的具有尺度偏差的相对深度，结合**相机内参**和**箱体的物理尺寸**，估计图像中箱体内壁各部分在相机坐标系下的深度值。相关方法已获得中国国家知识产权局授权发明专利（[CN119648771A](https://patents.google.com/patent/CN119648771A/en?oq=CN119648771A)）。
 
+|  |  |
+| :-: | - |
+|![image](./sample/box_image.jpg =300x) |  |
+
 ### 预先准备数据
 
 * 相机内参（可通过标定获得）
@@ -168,7 +172,6 @@ $$
 $$
 {depth}_{\text{bottom}}=\text{height}
 $$
-
 
 ## 致谢
 
