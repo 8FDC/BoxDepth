@@ -6,9 +6,24 @@ A monocular metric depth estimation approach for box interior images leveraging 
 
 现有的单目图像深度估计模型，其在不经过微调或特定场景数据集训练的情况下，通常存在不同程度的尺度偏差问题，导致其估计结果和实际深度差异较大，难以直接应用到视觉测量系统中。本方法利用深度估计模型输出的具有尺度偏差的相对深度，结合**相机内参**和**箱体的物理尺寸**，估计图像中箱体内壁各部分在相机坐标系下的深度值。相关方法已获得中国国家知识产权局授权发明专利（[CN119648771A](https://patents.google.com/patent/CN119648771A/en?oq=CN119648771A)）。
 
-|  |  |
-| :-: | - |
-|![image](./sample/box_image.jpg =300x) |  |
+<table align="center" style="margin: 0 auto;">
+  <tr>
+    <td align="center">
+      <img src="./sample/box_image.jpg" alt="box image" height="200" />
+    </td>
+    <td align="center">
+      <img src="./sample/depth_computed.png" alt="height" height="200" />
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      输入图片
+    </td>
+    <td align="center">
+      深度计算结果
+    </td>
+  </tr>
+</table>
 
 ### 预先准备数据
 
@@ -20,7 +35,10 @@ A monocular metric depth estimation approach for box interior images leveraging 
 ### Step 1：使用一个深度估计模型预测出相对深度值
 
 要求该深度估计结果应和实际深度成近似的线性关系：
-![Ground Truth - Depth Prediction scatter map](./assets/depth_prediction_scatter.png "Ground Truth - Depth Prediction scatter map")
+
+<p align="center">
+  <img src="./assets/depth_prediction_scatter.png" alt="box image" height="400" />
+</p>
 
 你可以使用Depth Pro或DepthAnything v2（metric depth版本），他们本应预测出metric depth，但是他们预测出的结果与实际深度值存在不可避免的尺度偏移，该偏移的大小不影响本方法结果结果。
 
